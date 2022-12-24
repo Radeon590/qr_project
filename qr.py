@@ -19,10 +19,10 @@ class QrHandler():
                                         square_length_3 = self._get_square_length(
                                             img, y, x + qr_size)
                                         if square_length_3 != -5 and self._is_has_lil_square(img, y, x + qr_size, square_length_3):
-                                            return img[y: y + qr_size + square_length, x: x + qr_size + square_length]
+                                            if square_length_3 in range(square_length - 3, square_length + 3):
+                                                return img[y: y + qr_size + square_length, x: x + qr_size + square_length]
 
     # не забываем про помехи на изображении, поэтому при проверке какой-либо точки нужно проверять небольшой регион вокруг этой точки
-
     def _is_black_point(self, img, y, x, inaccuracy):
         y_2 = y + inaccuracy
         if y_2 >= len(img):
@@ -34,6 +34,7 @@ class QrHandler():
             for x in range(x - inaccuracy, x_2):
                 if (img[y, x] < [50, 50, 50]).all():
                     return True
+        return False
 
     def _get_square_length(self, img, y, x):
         square_length = 0
@@ -67,11 +68,12 @@ class QrHandler():
                     break
                 lil_square_length_y += 1
             if have_white and (lil_square_length_y in range(lil_square_length - 3, lil_square_length + 3)):
-                return True
+                if self._is_black_point(img, y + lil_square_length, x + lil_square_length, 3):
+                    return True
         return False
 
 
-img = cv.imread('qr_code.jpg', cv.IMREAD_COLOR)
+img = cv.imread('qr_wider.jpg', cv.IMREAD_COLOR)
 qr_handler = QrHandler()
 img = qr_handler.detect(img)
 cv.imshow('test', img)
